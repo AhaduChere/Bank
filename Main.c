@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 //void function for depositing money 
 void depositAndUpdateBalance(float deposit, int numaccount){
     // Asks user for deposit amount
@@ -25,7 +26,7 @@ void depositAndUpdateBalance(float deposit, int numaccount){
             foundAccountA = 1;
             existingBalanceA += deposit; // Update the existing balance
         }
-        fprintf(tempFile, "%d = $%.2f\n", accountNumber, existingBalanceA); // Write to temporary file
+        fprintf(tempFile, "%d = $%.2f", accountNumber, existingBalanceA); // Write to temporary file
     }
 
     fclose(balanceFile);
@@ -40,7 +41,7 @@ void depositAndUpdateBalance(float deposit, int numaccount){
     // Replace original file with the temporary file
     remove("Balance.txt");
     rename("temp.txt", "Balance.txt");
-    printf("Deposit successful.\n");
+    printf("Deposit successful.\n\n");
 }
 
 //void function for withdrawing money
@@ -92,7 +93,7 @@ void withdrawAndUpdateBalance(float withdrawal, int numaccount){
     remove("Balance.txt");
     rename("temp.txt", "Balance.txt");
 
-    printf("Withdrawal successful.\n");
+    printf("Withdrawal successful.\n\n");
 }
 
 //void function for displaying account balance
@@ -123,73 +124,69 @@ void displayBalance(int numaccount) {
     }
 }
 
-//void function for making a new account
-void CreateNewAccount(char newname[50]){
- FILE *AccountFile = fopen("Accounts.txt", "r+");
-    if (AccountFile == NULL) {
-        printf("Error opening Balance.txt\n");
-        return;
-    }
-    createaccountnumber:
-int randomNumber = (rand() % 900000) + 100000;
+//Void function for login
+void Login(){
 
-    int accountnumber;
-    while(fscanf(AccountFile, "%d = $%d", &accountnumber)){
-        if(accountnumber == randomNumber){
-            goto createaccountnumber;
-        }
-        else{
-            printf("%d",randomNumber);
-        }
-    }
-
-}
-
-//main function 
-int main(void) {
-    char option;
     int numaccount;
     float deposit;
     float withdraw;
-    char choice;
-    char newname[50];
+    char option;
 
-
-    Start:
-
-    printf("Welcome to Bank System! What would you like to do?\nA.Login\nB.Signup\n");
-    scanf("%c", &choice);
-    if (choice == 'a' || choice == 'A') 
-{
-  goto Login;
-}
-if (choice == 'b' || choice == 'B') 
-{
-  goto Signup;
-}
-
-
-  //inquires users accountnumber
-  Login:
-    printf("\nHello, Enter your 6 digit account number: ");
+    Login:
+printf("\nEnter your 6 digit account number: ");
     scanf("%d", &numaccount);
+
   //Checks for account file
     FILE *file = fopen("Accounts.txt", "r");
     if (file == NULL) {
-        printf("Error opening accounts.\n");
-        return 1;
+        printf("Error accessing accounts.\n");
+        return;
     }
 
     int found = 0;
     int accountNum;
     char name[50];
+
 //Grabs users account and users name
     while (fscanf(file, "%d %s", &accountNum, name) != EOF) {
         if (accountNum == numaccount) {
             found = 1;
             printf("\nWelcome %s!\n", name);
-            break;
-        }
+            
+    Options:
+  printf("Please choose from the options below\n\nA.Deposit\nB.Withdraw\nC.Display Balance\nD.Logout\n\n");
+    scanf(" %c", &option);
+
+  if (option == 'a' || option == 'A') 
+{
+  depositAndUpdateBalance(deposit, numaccount);
+  goto Options;
+}
+
+  if (option == 'b' || option == 'B')
+{
+  withdrawAndUpdateBalance(withdraw, numaccount);
+  goto Options;
+}
+
+  if (option == 'c' || option == 'C')
+{
+  displayBalance(numaccount);
+  goto Options;
+}
+
+  if (option == 'd' || option == 'D') 
+{
+    printf("Goodbye!\n\n");
+   return;
+}
+
+  if (option != 'a'&&option != 'A'&&
+      option != 'b'&&option != 'B'&&
+      option != 'c'&&option != 'C'){ 
+     printf("Sorry that wasnt one of the options provided\n\n");
+     goto Options;}
+       }
     }
 
     fclose(file);
@@ -199,43 +196,86 @@ if (choice == 'b' || choice == 'B')
         goto Login;
     }
 
-
-//gives user account options
-  Options:
-    printf("Please choose from the options below\n\nA.Deposit\nB.Withdraw\nC.Display Balance\nD.Logout\n\n");
-    scanf(" %c", &option);
-
-  if (option == 'a' || option == 'A') 
-{
-  depositAndUpdateBalance(deposit, numaccount);
-
+    
 }
-  if (option == 'b' || option == 'B')
-{
-  withdrawAndUpdateBalance(withdraw, numaccount);
 
-}
-  if (option == 'c' || option == 'C')
-{
-  displayBalance(numaccount);
- 
-}
-  if (option == 'd' || option == 'D') 
-{
-    printf("Goodbye!\n\n");
-   goto Start;
-}
-  if (option != 'a'&&option != 'A'&&
-      option != 'b'&&option != 'B'&&
-      option != 'c'&&option != 'C'){ 
-     printf("Sorry that wasnt one of the options provided\n\n");
-     goto Options;}
-  
-Signup:
-printf("\nEnter your First Name\n");
+//void function for making a new account
+void CreateNewAccount(char newname[50],int randNum,int accounts,char users[50]){
+  printf("\nEnter your First Name\n");
     scanf("%49s", newname);  
 
+ FILE *AccountFile = fopen("Accounts.txt", "r+");
+    if (AccountFile == NULL) {
+        printf("Error opening Accounts.txt\n");
+        return;
+    } //check if user already has an account
+    while (fscanf(AccountFile, "%d %s", &accounts, users) == 2) {
+        if (strcmp(users, newname) == 0) {
+            printf("You already have an account with us\n");
+            return;
+          }
+        else{
+            goto createaccountnumber;
+            }
+    }
+    fclose(AccountFile);
+    // creates account new account number without creating duplicates
+    createaccountnumber:
+     AccountFile = fopen("Accounts.txt", "r+");
+    if (AccountFile == NULL) {
+        printf("Error opening Accounts.txt\n");
+        return;
+    }
+    generate:
+    srand(time(NULL));
+    randNum = rand() % 900000 + 100000;
+    
+    while(fscanf(AccountFile, "%d = %c", &accounts)){
+        if(accounts == randNum){
+            goto generate;
+        }
+
+         printf("Your new account number is %d\n",randNum);
+
+            AccountFile = fopen("Accounts.txt", "a");
+               
+            fprintf(AccountFile, "\n%d %s", randNum, newname);
+            fclose(AccountFile);
+            
+            FILE*BalanceFile = fopen("Balance.txt","a");
+            fprintf(BalanceFile,"\n%d = $0.00");
+            fclose(BalanceFile); 
+            return;
+            }
+       }
+    
+  
 
 
-  return 0;
+//main function 
+int main() {
+    char option;
+    int numaccount;
+    float deposit;
+    float withdraw;
+    char choice;
+    char newname[50];
+    int randNum;
+    int accounts;
+    char users[50];
+
+
+     printf("Welcome to Simple Bank System! What would you like to do?\nA.Login\nB.Signup\n");
+    scanf(" %c", &choice);
+    if (choice == 'a' || choice == 'A') 
+{
+  Login();
+}
+if (choice == 'b' || choice == 'B') 
+{
+  CreateNewAccount(newname,randNum,accounts,users);
+}
+
+
+return 0;
 }
