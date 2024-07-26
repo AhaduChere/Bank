@@ -1,1 +1,1 @@
-Simple Bank System By Ahadu Chere
+Simple Bank System
