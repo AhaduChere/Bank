@@ -9,7 +9,7 @@
 
 //clears screen so it looks nice in terminal
 void clearScreen() {
-    printf("\033[H\033[J"); //clear c 
+    printf("\033[H\033[J"); 
 
 }
 
